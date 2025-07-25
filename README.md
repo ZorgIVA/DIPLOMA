@@ -22,9 +22,6 @@ Elasticsearch API (9200) от Zabbix (для мониторинга), Elasticsea
 HTTP от Load Balancer или внешних пользователей, lb-sg  и т. д..
 
 <img src = "img\1_1.jpg" width = 100%>
-
-<img src = "img\1_2jpg" width = 100%>
-
-<img src = "img\1_3jpg" width = 100%>
-
-<img src = "img\1_4jpg" width = 100%>
+<img src = "img\1_2.jpg" width = 100%>
+<img src = "img\1_3.jpg" width = 100%>
+<img src = "img\1_4.jpg" width = 100%>
