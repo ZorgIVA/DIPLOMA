@@ -23,7 +23,7 @@ HTTP от Load Balancer или внешних пользователей, lb-sg 
 
 <img src = "img\1_1.jpg" width = 100%>
 
-<img src = "img\1_2jpg" width = 100%
+<img src = "img\1_2jpg" width = 100%>
 
 <img src = "img\1_3jpg" width = 100%>
 
