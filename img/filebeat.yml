@@ -1,0 +1,228 @@
+---
+- name: Установка и настройка Filebeat (включая Nginx)
+  hosts: web_servers
+  become: yes
+  vars:
+    elasticsearch_ip: "{{ hostvars['elasticsearch_host']['ansible_host'] }}"
+    filebeat_local_tarball_path: "/home/zorg/filebeat-9.0.4-linux-x86_64.tar.gz"
+    filebeat_tarball_name: "filebeat-9.0.4-linux-x86_64.tar.gz"
+    filebeat_version: "9.0.4"
+    filebeat_user: "root"
+    filebeat_group: "root"
+  tasks:
+   - name: Установить Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Запустить и включить Nginx
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+    # ---------------------------------
+
+    - name: Убедиться, что каталог логов Nginx существует
+      file:
+        path: /var/log/nginx
+        state: directory
+        owner: root
+        group: adm 
+        mode: '0755'
+
+    - name: Создать пустые логфайлы Nginx, если они не существуют
+      copy:
+        content: ""
+        dest: "{{ item }}"
+        owner: root
+        group: adm
+        mode: '0644'
+        force: no # Не перезаписывать, если файл уже существует
+      loop:
+        - /var/log/nginx/access.log
+        - /var/log/nginx/error.log
+    # -------------------------------------------------------
+
+    # --- Проверка существования логфайлов перед установкой Filebeat ---
+    - name: Проверить существование лог-файлов Nginx
+      stat:
+        path: "{{ item }}"
+      register: nginx_logs_stat
+      loop:
+        - /var/log/nginx/access.log
+        - /var/log/nginx/error.log
+
+    - name: Отладка - Вывести информацию о лог-файлах Nginx
+      debug:
+        msg: "Файл {{ item.stat.path }} существует: {{ item.stat.exists }}"
+      loop: "{{ nginx_logs_stat.results }}"
+      loop_control:
+        label: "{{ item.stat.path }}"
+    # ---------------------------------------------------------------------------
+
+    # --- Остальные задачи Filebeat (установка, конфигурация, служба) ---
+    - name: Установить зависимости для Filebeat (curl, tar)
+      apt:
+        name:
+          - curl
+          - tar
+        state: present
+
+    - name: Создать каталог для установки Filebeat
+      file:
+        path: /opt/filebeat
+        state: directory
+        owner: "{{ filebeat_user }}"
+        group: "{{ filebeat_group }}"
+        mode: '0755'
+
+    - name: Скопировать архив Filebeat на удаленный хост
+      copy:
+        src: "{{ filebeat_local_tarball_path }}"
+        dest: "/tmp/{{ filebeat_tarball_name }}"
+        owner: "{{ filebeat_user }}"
+        group: "{{ filebeat_group }}"
+        mode: '0644'
+
+    - name: Распаковать архив Filebeat
+      unarchive:
+        src: "/tmp/{{ filebeat_tarball_name }}"
+        dest: /opt/filebeat
+        owner: "{{ filebeat_user }}"
+        group: "{{ filebeat_group }}"
+        remote_src: yes
+
+    - name: Создать символическую ссылку для Filebeat
+      file:
+        src: "/opt/filebeat/filebeat-9.0.4-linux-x86_64/filebeat"
+        dest: /usr/local/bin/filebeat
+        state: link
+        owner: "{{ filebeat_user }}"
+        group: "{{ filebeat_group }}"
+
+    - name: Создать каталог конфигурации Filebeat
+      file:
+        path: /etc/filebeat
+        state: directory
+        owner: "{{ filebeat_user }}"
+        group: "{{ filebeat_group }}"
+        mode: '0755'
+
+    - name: Создать каталог данных Filebeat
+      file:
+        path: /var/lib/filebeat
+        state: directory
+        owner: "{{ filebeat_user }}"
+        group: "{{ filebeat_group }}"
+        mode: '0755'
+
+    # --- Настройка конфигурации Filebeat (processors) ---
+    - name: Создать конфигурационный файл filebeat.yml
+      copy:
+        content: |
+          filebeat.inputs:
+          - type: log
+            enabled: true
+            paths:
+              - /var/log/nginx/access.log
+            fields:
+              service: nginx
+              type: access
+            fields_under_root: true
+
+          - type: log
+            enabled: true
+            paths:
+              - /var/log/nginx/error.log
+            fields:
+              service: nginx
+              type: error
+            fields_under_root: true
+
+          filebeat.config.modules:
+            path: ${path.config}/modules.d/*.yml
+            reload.enabled: false
+
+          setup.template.settings:
+            index.number_of_shards: 1
+
+          output.elasticsearch:
+            hosts: ["{{ elasticsearch_ip }}:9200"]
+
+          processors:
+            - add_host_metadata:
+                when.not.contains.tags: forwarded
+            
+        dest: /etc/filebeat/filebeat.yml
+        owner: "{{ filebeat_user }}"
+        group: "{{ filebeat_group }}"
+        mode: '0644'
+      notify: Перезапустить Filebeat
+    # ----------------------------------------------------------------
+
+    # --- Проверка конфигурационного файла Filebeat ---
+    - name: Проверить конфигурационный файл Filebeat
+      command: /usr/local/bin/filebeat -c /etc/filebeat/filebeat.yml test config
+      changed_when: false 
+    # --------------------------------------------------------------
+
+    - name: Создать unit-файл systemd для Filebeat
+      copy:
+        content: |
+          [Unit]
+          Description=Filebeat sends log files to Logstash or directly to Elasticsearch.
+          Documentation=https://www.elastic.co/products/beats/filebeat
+          Wants=network-online.target
+          After=network-online.target
+
+          [Service]
+          Type=simple
+          User={{ filebeat_user }}
+          Group={{ filebeat_group }}
+          Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+          ExecStart=/usr/local/bin/filebeat -c /etc/filebeat/filebeat.yml -path.home /opt/filebeat/filebeat-9.0.4-linux-x86_64 -path.config /etc/filebeat -path.data /var/lib/filebeat -path.logs /var/log/filebeat
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/filebeat.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - Перезагрузить systemd
+        - Включить и запустить Filebeat
+
+    - name: Создать каталог логов Filebeat
+      file:
+        path: /var/log/filebeat
+        state: directory
+        owner: "{{ filebeat_user }}"
+        group: "{{ filebeat_group }}"
+        mode: '0755'
+
+    - name: Создать файл лога Filebeat
+      copy:
+        content: ""
+        dest: /var/log/filebeat/filebeat
+        owner: "{{ filebeat_user }}"
+        group: "{{ filebeat_group }}"
+        mode: '0644'
+        force: no
+
+  handlers:
+    - name: Перезагрузить systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Включить и запустить Filebeat
+      systemd:
+        name: filebeat
+        enabled: yes
+        state: started
+
+    - name: Перезапустить Filebeat
+      systemd:
+        name: filebeat
+        state: restarted

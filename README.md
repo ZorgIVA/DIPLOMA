@@ -43,3 +43,21 @@ snapshots: [snapshots.tf](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/sna
 terraform.tfvars: [terraform.tfvars](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/terraform.tfvars)
 
 variables: [variables.tf](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/variables.tf)
+
+### Файлы Ansible:
+
+elasticsearch: [elasticsearch.yml](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/elasticsearch.yml)
+
+filebeat_nginx.yml.j2: [filebeat_nginx.yml.j2](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/filebeat_nginx.yml.j2)
+
+filebeat: [filebeat.yml](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/filebeat.yml)
+
+inventory: [inventory.ini](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/inventory.ini)
+
+kibana: [kibana.yml](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/kibana.yml)
+
+vault_password: [vault_password.txt](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/vault_password.txt)
+
+zabbix_agent: [zabbix_agent.yml](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/zabbix_agent.yml)
+
+zabbix_server: [zabbix_server.yml](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/zabbix_sever.yml)

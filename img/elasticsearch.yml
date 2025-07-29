@@ -1,0 +1,47 @@
+---
+- name: Установка и настройка Elasticsearch
+  hosts: elasticsearch
+  become: yes
+  vars:
+    es_version: "8.x"
+  tasks:
+    - name: Установить Java
+      apt:
+        name: openjdk-17-jdk
+        state: present
+        update_cache: yes
+
+    - name: GPG-ключ Elasticsearch
+      apt_key:
+        url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        state: present
+
+    - name: Добавить репозиторий Elasticsearch
+      apt_repository:
+        repo: "deb https://artifacts.elastic.co/packages/{{ es_version }}/apt stable main"
+        state: present
+        filename: elastic
+    # ---------------------------------------------
+
+    - name: Обновить список пакетов
+      apt:
+        update_cache: yes
+
+    - name: Установить Elasticsearch
+      apt:
+        name: elasticsearch=8.15.1
+        state: present
+      
+    - name: Настроить Elasticsearch (network.host)
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#network.host:'
+        line: "network.host: [_local_, _site_]" # Позволяет локальные и частные подключения
+        backup: yes
+
+    - name: Включить и запустить Elasticsearch
+      systemd:
+        name: elasticsearch
+        state: started
+        enabled: yes
+        

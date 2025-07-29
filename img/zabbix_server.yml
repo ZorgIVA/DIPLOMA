@@ -1,0 +1,118 @@
+---
+- name: Установка и настройка Zabbix Server
+  hosts: zabbix_server_host
+  become: yes
+  vars:
+    zabbix_version: "6.0"
+    # Для Ubuntu 24.04 правильное кодовое имя - 'noble'
+    zabbix_repo_codename: "noble"
+    # Пароль для БД Zabbix. Используйте Ansible Vault!
+    db_password: !vault |
+                   $ANSIBLE_VAULT;1.1;AES256
+                   65393930373962326432303561366138353034393835343332363466376339363666343039366533
+                   3530333461313765613965343733353836356263636532340a653264633433646465363431326162
+                   63316437623464326238663364313838326230306662333635396538313239623439303530386137
+                   3266346165313465360a613738323433323530353065386662363565663237653330356533636261
+                   3161
+  tasks:
+    - name: Обновить список пакетов
+      apt:
+        update_cache: yes
+
+    - name: Установить ключ репозитория Zabbix
+      apt_key:
+        url: https://repo.zabbix.com/zabbix-official-repo.key
+        state: present
+
+    - name: Добавить репозиторий Zabbix (Ubuntu)
+      apt_repository:
+        repo: "deb [arch=amd64] https://repo.zabbix.com/zabbix/{{ zabbix_version }}/ubuntu {{ zabbix_repo_codename }} main"
+        state: present
+        filename: zabbix
+
+    - name: Обновить список пакетов после добавления репозитория Zabbix
+      apt:
+        update_cache: yes
+
+    # --- Добавлено: Установка Python-библиотеки для MySQL ---
+    - name: Установить системный Python-пакет для работы с MySQL (PyMySQL)
+      apt:
+        name:
+          - python3-pymysql
+        state: present
+    # --------------------------------------------------------
+
+    - name: Установить Zabbix Server, Frontend, Agent, Database (MySQL)
+      apt:
+        name:
+          - zabbix-server-mysql
+          - zabbix-frontend-php
+          - zabbix-apache-conf
+          - zabbix-sql-scripts
+          - zabbix-agent
+          - mysql-server
+        state: present
+
+    - name: Запустить и включить MySQL
+      systemd:
+        name: mysql
+        state: started
+        enabled: yes
+
+    # --- Небольшая пауза, чтобы убедиться, что MySQL полностью запустился ---
+    - name: Подождать, пока MySQL запустится
+      wait_for:
+        host: localhost
+        port: 3306
+        state: started
+        timeout: 30
+    # ----------------------------------------------------------------------------------
+
+    - name: Создать базу данных Zabbix
+      mysql_db:
+        name: zabbix
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        # login_user и login_password не требуются при использовании unix_socket
+
+    - name: Создать пользователя Zabbix в MySQL
+      mysql_user:
+        name: zabbix
+        password: "{{ db_password }}"
+        priv: 'zabbix.*:ALL'
+        host: localhost
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        # login_user и login_password не требуются при использовании unix_socket
+
+    # Импорт схемы БД Zabbix
+    - name: Импортировать схему БД Zabbix
+      shell: |
+        zcat /usr/share/doc/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p{{ db_password }} zabbix
+      args:
+        executable: /bin/bash
+      
+    - name: Настроить конфигурацию Zabbix Server (DB password)
+      lineinfile:
+        path: /etc/zabbix/zabbix_server.conf
+        regexp: '^DBPassword='
+        line: "DBPassword={{ db_password }}"
+        backup: yes
+
+    - name: Перезапустить и включить Zabbix Server
+      systemd:
+        name: zabbix-server
+        state: restarted
+        enabled: yes
+
+    - name: Перезапустить Apache
+      systemd:
+        name: apache2
+        state: restarted
+        enabled: yes
+
+    - name: Включить и запустить Zabbix Agent
+      systemd:
+        name: zabbix-agent
+        state: started
+        enabled: yes
