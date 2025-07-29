@@ -25,7 +25,6 @@ HTTP от Load Balancer или внешних пользователей, lb-sg 
 <img src = "img\1_2.jpg" width = 100%>
 <img src = "img\1_3.jpg" width = 100%>
 <img src = "img\1_4.jpg" width = 100%>
-<img src = "img\1_5.jpg" width = 100%>
 <img src = "img\1_6.jpg" width = 100%>
 
 ### Файлы Terraform:
@@ -61,3 +60,11 @@ vault_password: [vault_password.txt](https://github.com/ZorgIVA/DIPLOMA/blob/mas
 zabbix_agent: [zabbix_agent.yml](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/zabbix_agent.yml)
 
 zabbix_server: [zabbix_server.yml](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/zabbix_server.yml)
+
+### Мониторинг:
+
+
+<img src = "img\1_5.jpg" width = 100%>
+<img src = "img\1_7.jpg" width = 100%>
+<img src = "img\1_8.jpg" width = 100%>
+<img src = "img\1_9.jpg" width = 100%>
