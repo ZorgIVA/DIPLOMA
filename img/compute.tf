@@ -9,15 +9,15 @@ resource "yandex_compute_instance" "bastion" {
   }
   boot_disk {
     initialize_params {
-      image_id = "fd8slqa3vkedptmcmgh7" # Ubuntu 20.04 - Закомментировано
-      # image_id = "ubuntu-24-04-lts-v20240805" # Ubuntu 24.04 - Пример, используйте актуальный ID
+      image_id = "fd8slqa3vkedptmcmgh7" 
+      
       size     = 10
     }
   }
   network_interface {
     subnet_id = yandex_vpc_subnet.public-a.id
     nat       = true
-    # --- Добавлено: Применение Security Group ---
+    # --- Применение Security Group ---
     security_group_ids = [yandex_vpc_security_group.bastion-sg.id]
     # --------------------------------------------
   }
@@ -37,14 +37,14 @@ resource "yandex_compute_instance" "web1" {
   }
   boot_disk {
     initialize_params {
-      image_id = "fd8slqa3vkedptmcmgh7" # Ubuntu 20.04 - Закомментировано
-      # image_id = "ubuntu-24-04-lts-v20240805" # Ubuntu 24.04 - Пример, используйте актуальный ID
+      image_id = "fd8slqa3vkedptmcmgh7" 
+
       size     = 10
     }
   }
   network_interface {
     subnet_id = yandex_vpc_subnet.private-a.id
-    # --- Добавлено: Применение Security Group ---
+    # --- Применение Security Group ---
     security_group_ids = [yandex_vpc_security_group.web-sg.id]
     # --------------------------------------------
   }
@@ -67,14 +67,13 @@ resource "yandex_compute_instance" "web2" {
   }
   boot_disk {
     initialize_params {
-      image_id = "fd8slqa3vkedptmcmgh7" # Ubuntu 20.04 - Закомментировано
-      # image_id = "ubuntu-24-04-lts-v20240805" # Ubuntu 24.04 - Пример, используйте актуальный ID
+      image_id = "fd8slqa3vkedptmcmgh7" 
       size     = 10
     }
   }
   network_interface {
     subnet_id = yandex_vpc_subnet.private-b.id
-    # --- Добавлено: Применение Security Group ---
+    # --- Применение Security Group ---
     security_group_ids = [yandex_vpc_security_group.web-sg.id]
     # --------------------------------------------
   }
@@ -97,15 +96,14 @@ resource "yandex_compute_instance" "zabbix" {
   }
   boot_disk {
     initialize_params {
-      image_id = "fd8slqa3vkedptmcmgh7" # Ubuntu 20.04 - Закомментировано
-      # image_id = "ubuntu-24-04-lts-v20240805" # Ubuntu 24.04 - Пример, используйте актуальный ID
+      image_id = "fd8slqa3vkedptmcmgh7" 
       size     = 10
     }
   }
   network_interface {
     subnet_id = yandex_vpc_subnet.public-a.id
     nat       = true
-    # --- Добавлено: Применение Security Group ---
+    # --- Применение Security Group ---
     security_group_ids = [yandex_vpc_security_group.zabbix-sg.id]
     # --------------------------------------------
   }
@@ -125,14 +123,14 @@ resource "yandex_compute_instance" "elasticsearch" {
   }
   boot_disk {
     initialize_params {
-      image_id = "fd8slqa3vkedptmcmgh7" # Ubuntu 20.04 - Закомментировано
-      # image_id = "ubuntu-24-04-lts-v20240805" # Ubuntu 24.04 - Пример, используйте актуальный ID
+      image_id = "fd8slqa3vkedptmcmgh7" 
+
       size     = 10
     }
   }
   network_interface {
     subnet_id = yandex_vpc_subnet.private-a.id
-    # --- Добавлено: Применение Security Group ---
+    # --- Применение Security Group ---
     security_group_ids = [yandex_vpc_security_group.elasticsearch-sg.id] # Новая SG
     # --------------------------------------------
   }
@@ -155,18 +153,16 @@ resource "yandex_compute_instance" "kibana" {
   }
   boot_disk {
     initialize_params {
-      image_id = "fd8slqa3vkedptmcmgh7" # Ubuntu 20.04 - Закомментировано
-      # image_id = "ubuntu-24-04-lts-v20240805" # Ubuntu 24.04 - Пример, используйте актуальный ID
+      image_id = "fd8slqa3vkedptmcmgh7" 
+
       size     = 10
     }
   }
   network_interface {
     subnet_id = yandex_vpc_subnet.public-a.id
     nat       = true
-    # --- Добавлено: Применение Security Group ---
-    # Предполагаем, что Kibana будет использовать ту же SG, что и Zabbix, для SSH через bastion
-    # и доступ к веб-интерфейсу. Если нужна отдельная SG, создайте её в security.tf
-    security_group_ids = [yandex_vpc_security_group.zabbix-sg.id] # Или новая SG
+    # --- Применение Security Group ---
+    security_group_ids = [yandex_vpc_security_group.zabbix-sg.id] 
     # --------------------------------------------
   }
   metadata = {

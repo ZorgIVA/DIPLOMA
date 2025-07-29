@@ -27,3 +27,19 @@ HTTP от Load Balancer или внешних пользователей, lb-sg 
 <img src = "img\1_4.jpg" width = 100%>
 <img src = "img\1_5.jpg" width = 100%>
 <img src = "img\1_6.jpg" width = 100%>
+
+### Файлы Terraform:
+
+compute: [compute.tf](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/compute.tf)
+
+lb: [lb.tf](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/lb.tf)
+
+main: [main.tf](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/main.tf)
+
+security: [security.tf](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/security.tf)
+
+snapshots: [snapshots.tf](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/snapshots.tf)
+
+terraform.tfvars: [terraform.tfvars](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/terraform.tfvars)
+
+variables: [variables.tf](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/variables.tf)
