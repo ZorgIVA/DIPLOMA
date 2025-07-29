@@ -60,4 +60,4 @@ vault_password: [vault_password.txt](https://github.com/ZorgIVA/DIPLOMA/blob/mas
 
 zabbix_agent: [zabbix_agent.yml](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/zabbix_agent.yml)
 
-zabbix_server: [zabbix_server.yml](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/zabbix_sever.yml)
+zabbix_server: [zabbix_server.yml](https://github.com/ZorgIVA/DIPLOMA/blob/master/img/zabbix_server.yml)
