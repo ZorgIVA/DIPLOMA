@@ -4,9 +4,8 @@
   become: yes
   vars:
     zabbix_version: "6.0"
-    # Для Ubuntu 24.04 правильное кодовое имя - 'noble'
     zabbix_repo_codename: "noble"
-    # Пароль для БД Zabbix. Используйте Ansible Vault!
+    # Пароль для БД Zabbix. 
     db_password: !vault |
                    $ANSIBLE_VAULT;1.1;AES256
                    65393930373962326432303561366138353034393835343332363466376339363666343039366533
@@ -34,7 +33,6 @@
       apt:
         update_cache: yes
 
-    # --- Добавлено: Установка Python-библиотеки для MySQL ---
     - name: Установить системный Python-пакет для работы с MySQL (PyMySQL)
       apt:
         name:
@@ -59,7 +57,6 @@
         state: started
         enabled: yes
 
-    # --- Небольшая пауза, чтобы убедиться, что MySQL полностью запустился ---
     - name: Подождать, пока MySQL запустится
       wait_for:
         host: localhost
@@ -73,8 +70,7 @@
         name: zabbix
         state: present
         login_unix_socket: /var/run/mysqld/mysqld.sock
-        # login_user и login_password не требуются при использовании unix_socket
-
+        
     - name: Создать пользователя Zabbix в MySQL
       mysql_user:
         name: zabbix
@@ -83,9 +79,7 @@
         host: localhost
         state: present
         login_unix_socket: /var/run/mysqld/mysqld.sock
-        # login_user и login_password не требуются при использовании unix_socket
-
-    # Импорт схемы БД Zabbix
+        
     - name: Импортировать схему БД Zabbix
       shell: |
         zcat /usr/share/doc/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p{{ db_password }} zabbix

@@ -36,7 +36,7 @@
       lineinfile:
         path: /etc/elasticsearch/elasticsearch.yml
         regexp: '^#network.host:'
-        line: "network.host: [_local_, _site_]" # Позволяет локальные и частные подключения
+        line: "network.host: [_local_, _site_]" #  локальные подключения
         backup: yes
 
     - name: Включить и запустить Elasticsearch

@@ -3,7 +3,7 @@
   hosts: web_servers:elasticsearch:kibana:bastion # Все ВМ, кроме zabbix_server
   become: yes
   vars:
-    # Получаем IP Zabbix сервера из inventory
+    
     zabbix_server_ip: "{{ hostvars['zabbix_server_host']['ansible_host'] }}"
     zabbix_version: "6.0"
     zabbix_repo_codename: "noble"
