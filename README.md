@@ -68,3 +68,7 @@ zabbix_server: [zabbix_server.yml](https://github.com/ZorgIVA/DIPLOMA/blob/maste
 <img src = "img\1_7.jpg" width = 100%>
 <img src = "img\1_8.jpg" width = 100%>
 <img src = "img\1_9.jpg" width = 100%>
+
+### Логирование :
+
+<img src = "img\2_1.jpg" width = 100%>
