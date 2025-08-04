@@ -74,6 +74,6 @@ zabbix_server: [zabbix_server.yml](https://github.com/ZorgIVA/DIPLOMA/blob/maste
 <img src = "img\2_1.jpg" width = 100%>
 
 
-### Proxyjunp через Bastion :
+### Proxyjump через Bastion :
 
 <img src = "img\2_2.jpg" width = 100%>
